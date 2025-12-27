@@ -57,13 +57,15 @@ class PepeGame {
 
         // Reset reveal if going to it
         if (screenId === 'reveal') {
+            this.state.isOpened = false;
             const cover = document.getElementById('reveal-image-cover');
-            cover.style.transform = 'translateY(0)';
-            document.getElementById('reveal-hint').style.opacity = '1';
+            const hint = document.getElementById('reveal-hint');
             const nextBtn = document.getElementById('btn-next-player');
-            nextBtn.style.pointerEvents = 'none';
+
+            cover.style.transform = 'translateY(0)';
+            hint.style.opacity = '1';
             nextBtn.style.opacity = '0';
-            this.state.isOpened = false; // Reset state
+            nextBtn.style.pointerEvents = 'none';
         }
 
         // Always hide start message when leaving timer screen
@@ -74,14 +76,21 @@ class PepeGame {
     }
 
     resetGame() {
+        // Stop timer
         if (this.state.currentGame?.timerId) {
             clearInterval(this.state.currentGame.timerId);
         }
         if (this.state.msgTimeout) {
             clearTimeout(this.state.msgTimeout);
         }
+
+        // Reset state
         this.state.currentGame = null;
         this.state.selectedTarget = null;
+        this.state.isOpened = false;
+
+        // Close all modals
+        document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
 
         // Hide messages
         const msgBox = document.getElementById('start-who-msg');
@@ -348,11 +357,14 @@ class PepeGame {
 
         const handleEnd = (y) => {
             let diff = startY - y;
+            const revealHeight = parseFloat(cover.style.transform.replace('translateY(-', '').replace('%)', '')) || 37;
+
             if (!this.state.isOpened) {
-                if (diff > 100) {
-                    cover.style.transform = 'translateY(-37%)';
+                if (diff > 80) { // More sensitive (was 100)
+                    cover.style.transform = `translateY(-${revealHeight}%)`;
                     hint.style.opacity = '0';
                     this.state.isOpened = true;
+                    // Button remains hidden until swipe down
                     nextBtn.style.opacity = '0';
                     nextBtn.style.pointerEvents = 'none';
                 } else {
@@ -360,14 +372,14 @@ class PepeGame {
                     hint.style.opacity = '1';
                 }
             } else {
-                if (diff < -80) {
+                if (diff < -50) { // Much more sensitive down swipe (was -80)
                     cover.style.transform = 'translateY(0)';
                     hint.style.opacity = '1';
                     this.state.isOpened = false;
                     nextBtn.style.opacity = '1';
                     nextBtn.style.pointerEvents = 'all';
                 } else {
-                    cover.style.transform = 'translateY(-35%)';
+                    cover.style.transform = `translateY(-${revealHeight}%)`;
                 }
             }
         };
