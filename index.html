@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>PEPE el Impostor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="pepeicono.png">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Pantalla 1: Bienvenida -->
+        <section id="screen-welcome" class="screen active">
+            <img src="pepeicono.png" alt="Pepe" class="logo-fullscreen">
+            <div class="overlay-content dark-fade-in">
+                <h1 class="title-top">PEPE <br>EL IMPOSTOR</h1>
+                <button class="btn btn-primary pulse" style="margin-top: auto; margin-bottom: 5vh;"
+                    onclick="app.toScreen('menu')">Clic para continuar</button>
+            </div>
+        </section>
+
+        <!-- Pantalla 2: Menú Principal -->
+        <section id="screen-menu" class="screen">
+            <button class="btn-exit" onclick="app.toScreen('welcome')" title="Volver al inicio">✕</button>
+            <div class="overlay-content">
+                <img src="pepemenu.png" alt="Pepe"
+                    style="width: 100%; max-width: 400px; height: auto; margin-bottom: 1rem; border-radius: 20px;">
+
+                <div class="menu-grid">
+                    <div class="menu-item" onclick="app.openModal('mode')">
+                        <div class="menu-info">
+                            <h3>MODO DE JUEGO</h3>
+                            <p id="display-mode">CLÁSICO</p>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" onclick="app.openModal('players')">
+                        <div class="menu-info">
+                            <h3>LISTA DE JUGADORES</h3>
+                            <p id="display-players">3 JUGADORES</p>
+                        </div>
+                    </div>
+
+                    <div class="menu-item">
+                        <div class="menu-info"
+                            style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                            <div>
+                                <h3>IMPOSTORES</h3>
+                                <p id="display-impostors" style="font-size: 1.4rem;">1</p>
+                            </div>
+                            <div style="display: flex; gap: 0.8rem;">
+                                <button class="btn-secondary" style="width: 50px; height: 50px; font-size: 1.5rem;"
+                                    onclick="app.updateImpostors(-1)">-</button>
+                                <button class="btn-secondary" style="width: 50px; height: 50px; font-size: 1.5rem;"
+                                    onclick="app.updateImpostors(1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" onclick="app.openModal('duration')">
+                        <div class="menu-info">
+                            <h3>TIEMPO DE RONDA</h3>
+                            <p id="display-duration">5 MINUTOS</p>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" onclick="app.openModal('themes')">
+                        <div class="menu-info">
+                            <h3>TEMÁTICAS / PALABRAS</h3>
+                            <p id="display-themes">CLIC PARA ELEGIR</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" style="margin-top: 1.5rem; margin-bottom: 1rem;"
+                    onclick="app.prepareGame()">▶️ INICIAR PARTIDA</button>
+            </div>
+        </section>
+
+        <!-- Pre-Game Preview -->
+        <section id="screen-preview" class="screen">
+            <div class="overlay-content">
+                <div class="glass card" style="margin: auto; border-color: var(--accent);">
+                    <h2 style="color: var(--accent); margin-top: 1rem; text-align: center; letter-spacing: 2px;">RESUMEN
+                        DE PARTIDA</h2>
+                    <div id="preview-details" style="line-height: 2.2; font-size: 1.1rem; padding: 0 1rem;"></div>
+                    <div class="btn-container" style="margin-bottom: 1rem; padding: 0 1rem;">
+                        <button class="btn btn-secondary" style="flex: 1;"
+                            onclick="app.toScreen('menu')">VOLVER</button>
+                        <button class="btn btn-primary" style="flex: 1;" onclick="app.startGame()">JUGAR</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ronda de Palabras -->
+        <section id="screen-reveal" class="screen" style="padding: 0;">
+            <div class="reveal-container">
+                <div id="reveal-content-under" class="reveal-content-under">
+                    <div class="word-display-box">
+                        <h5 style="color: var(--accent); letter-spacing: 3px; margin-bottom: 2rem;">ESTA ES TU PALABRA
+                        </h5>
+                        <div id="revealed-word"
+                            style="font-size: 3.5rem; font-weight: 800; color: #fff; text-transform: uppercase; text-shadow: 0 0 20px var(--accent);">
+                            ?????</div>
+                        <p style="color: var(--text-muted); margin-top: 3rem; font-size: 1rem; font-weight: 600;">↓
+                            DESLIZÁ HACIA ABAJO PARA OCULTAR ↓</p>
+                    </div>
+                </div>
+
+                <div id="player-reveal-name">NOMBRE</div>
+                <img id="reveal-image-cover" src="imagengenerica.png" class="reveal-image-cover">
+
+                <div id="reveal-hint" class="hint-arrow">
+                    <span style="font-size: 0.9rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 5px;">DESLIZÁ
+                        PARA VER</span>
+                    <span>▲</span>
+                </div>
+
+                <div
+                    style="position: absolute; bottom: 8vh; width: 100%; display: flex; justify-content: center; z-index: 150;">
+                    <button id="btn-next-player" class="btn btn-primary"
+                        style="opacity: 0; pointer-events: none; min-width: 250px; box-shadow: 0 0 20px rgba(255,0,0,0.4);"
+                        onclick="app.nextPlayer()">SIGUIENTE JUGADOR</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transición Temporizador -->
+        <section id="screen-timer-start" class="screen">
+            <div class="overlay-content">
+                <h2 style="text-align: center; margin-top: 20vh; font-size: 2rem;">COLOCAR EN MESA EL TEMPORIZADOR</h2>
+                <button class="btn btn-primary" style="margin-top: auto; margin-bottom: 10vh;"
+                    onclick="app.startTimer()">Comenzar</button>
+            </div>
+        </section>
+
+        <!-- Temporizador Activo -->
+        <section id="screen-timer" class="screen">
+            <div class="overlay-content">
+                <div id="start-who-msg"
+                    style="position: absolute; top: 15vh; left: 50%; transform: translateX(-50%); width: 85%; text-align: center; color: var(--accent); font-size: 1.5rem; font-weight: 800; text-transform: uppercase; background: rgba(26,0,0,0.95); padding: 2rem 1rem; border: 2px solid var(--accent); border-radius: 15px; box-shadow: 0 0 30px rgba(255,0,0,0.5); z-index: 200; transition: opacity 0.5s; opacity: 0; pointer-events: none; backdrop-filter: blur(5px);">
+                    CARGANDO...
+                </div>
+                <div class="timer-container" style="margin: auto;">
+                    <div class="timer-circle">
+                        <span id="timer-display">05:00</span>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 3rem;" onclick="app.openVote()">VOTAR</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Votación -->
+        <section id="screen-vote" class="screen">
+            <div class="overlay-content">
+                <h2 style="color: var(--accent); margin-bottom: 2rem; text-align: center;">IDENTIFICAR A PEPE</h2>
+                <div id="vote-grid" class="vote-grid" style="overflow-y: auto; flex: 1; padding: 1rem;"></div>
+                <button class="btn btn-primary" style="margin-top: 1.5rem; margin-bottom: 2rem;"
+                    onclick="app.confirmVote()">PEPE TE ENCONTRÉ</button>
+            </div>
+        </section>
+
+        <!-- Resultado Final -->
+        <section id="screen-result" class="screen" style="padding: 0;">
+            <img id="result-img" src="pepelibre.png" class="fullscreen-bg">
+            <div class="overlay-content">
+                <h1 id="result-title"
+                    style="font-size: 2.5rem; text-align: center; text-shadow: 0 4px 15px #000; margin-bottom: 1rem;">
+                    RESULTADO</h1>
+                <p id="result-msg" style="margin-bottom: 2rem; padding: 0 2rem; text-align: center; font-size: 1.2rem;">
+                </p>
+                <div class="btn-container">
+                    <button id="btn-continue" class="btn btn-secondary" style="flex: 1;"
+                        onclick="app.continueTimer()">CONTINUAR</button>
+                    <button id="btn-menu" class="btn btn-primary" style="flex: 1;"
+                        onclick="app.resetGame()">INICIO</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODALS -->
+        <!-- Modo -->
+        <div id="modal-mode" class="modal-overlay">
+            <div class="modal glass">
+                <div class="modal-header">
+                    <h2 style="color: var(--accent);">MODO DE JUEGO</h2>
+                </div>
+                <div id="mode-list" class="selection-list">
+                    <div class="selection-item" onclick="app.setMode('Clásico')">
+                        <h4>CLÁSICO</h4>
+                        <p>Los impostores saben que lo son. Deben fingir y sobrevivir o adivinar la palabra.</p>
+                    </div>
+                    <div class="selection-item" onclick="app.setMode('Misterioso')">
+                        <h4>MISTERIOSO</h4>
+                        <p>Los impostores no saben que lo son. Reciben una palabra distinta al resto.</p>
+                    </div>
+                    <div class="selection-item" onclick="app.setMode('Caos')">
+                        <h4>CAOS</h4>
+                        <p>La cantidad de impostores es aleatoria. Puede haber uno, varios o todos.</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 2rem;"
+                    onclick="app.closeModal('mode')">GUARDAR</button>
+            </div>
+        </div>
+
+        <!-- Jugadores -->
+        <div id="modal-players" class="modal-overlay">
+            <div class="modal glass">
+                <div class="modal-header">
+                    <h2 style="color: var(--accent);">JUGADORES</h2>
+                </div>
+                <div id="player-list" style="margin-bottom: 1rem; max-height: 40vh; overflow-y: auto;"></div>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <input type="text" id="new-player-name" placeholder="Agregar jugador" class="btn-secondary"
+                        style="flex: 1; padding: 0.8rem; border-radius: 8px;">
+                    <button class="btn-primary" style="width: 50px; border-radius: 8px;"
+                        onclick="app.addPlayer()">+</button>
+                </div>
+                <button class="btn btn-primary" onclick="app.closeModal('players')">GUARDAR</button>
+            </div>
+        </div>
+
+        <!-- Duración -->
+        <div id="modal-duration" class="modal-overlay">
+            <div class="modal glass">
+                <div class="modal-header">
+                    <h2 style="color: var(--accent);">DURACIÓN</h2>
+                </div>
+                <input type="range" id="duration-slider" min="1" max="24" value="5"
+                    style="width: 100%; margin: 2.5rem 0; accent-color: var(--accent);">
+                <p style="text-align: center; font-size: 1.8rem; font-weight: 800;"><span id="duration-val">5</span> MIN
+                </p>
+                <button class="btn btn-primary" style="margin-top: 2rem;"
+                    onclick="app.closeModal('duration')">GUARDAR</button>
+            </div>
+        </div>
+
+        <!-- Temáticas -->
+        <div id="modal-themes" class="modal-overlay">
+            <div class="modal glass">
+                <div class="modal-header">
+                    <h2 style="color: var(--accent);">CATEGORÍAS</h2>
+                </div>
+                <div id="category-list" class="category-grid"
+                    style="max-height: 50vh; overflow-y: auto; padding-right: 5px;"></div>
+                <button class="btn btn-primary" style="margin-top: 2rem;"
+                    onclick="app.closeModal('themes')">GUARDAR</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+
+</html>
