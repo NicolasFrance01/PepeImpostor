@@ -122,6 +122,8 @@ class PepeGame {
     }
 
     openModal(id) {
+        const modal = document.getElementById(`modal-${id}`);
+        if (modal) modal.classList.add('active');
     }
 
     closeModal(id) {
